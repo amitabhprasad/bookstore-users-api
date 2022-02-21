@@ -10,6 +10,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func getUserID(c *gin.Context) (int64, *errors.RestErr) {
+	userId, err := strconv.ParseInt(c.Param("user_id"), 10, 64)
+	if err != nil {
+		return 0, errors.NewbadRequestError("Invalid userid, userid should be number")
+	}
+	return userId, nil
+}
 func CreateUser(c *gin.Context) {
 	var user users.User
 
@@ -27,10 +34,9 @@ func CreateUser(c *gin.Context) {
 }
 
 func GetUser(c *gin.Context) {
-	userId, err := strconv.ParseInt(c.Param("user_id"), 10, 64)
-	if err != nil {
-		restErr := errors.NewbadRequestError("Invalid userid, userid should be number")
-		c.JSON(restErr.Status, restErr)
+	userId, idError := getUserID(c)
+	if idError != nil {
+		c.JSON(idError.Status, idError)
 		return
 	}
 
@@ -42,6 +48,50 @@ func GetUser(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
-func SearchUser(c *gin.Context) {
-	c.String(http.StatusNotImplemented, "implement me SearchUser !")
+func UpdateUser(c *gin.Context) {
+	userId, idError := getUserID(c)
+	if idError != nil {
+		c.JSON(idError.Status, idError)
+		return
+	}
+
+	var user users.User
+	if err := c.ShouldBindJSON(&user); err != nil {
+		restErr := errors.NewbadRequestError("Invalid JSON body")
+		c.JSON(restErr.Status, restErr)
+		return
+	}
+	user.Id = userId
+	isPartial := c.Request.Method == http.MethodPatch
+
+	result, updateErr := service_user.UpdateUser(isPartial, user)
+	if updateErr != nil {
+		c.JSON(updateErr.Status, updateErr)
+		return
+	}
+	c.JSON(http.StatusFound, result)
+}
+
+func DeleteUser(c *gin.Context) {
+	userId, idError := getUserID(c)
+	if idError != nil {
+		c.JSON(idError.Status, idError)
+		return
+	}
+	deleteErr := service_user.DeleteUser(userId)
+	if deleteErr != nil {
+		c.JSON(deleteErr.Status, deleteErr)
+		return
+	}
+	c.JSON(http.StatusOK, map[string]string{"status": "deleted"})
+}
+
+func Search(c *gin.Context) {
+	status := c.Query("status")
+	users, err := service_user.Search(status)
+	if err != nil {
+		c.JSON(err.Status, err)
+		return
+	}
+	c.JSON(http.StatusOK, users)
 }

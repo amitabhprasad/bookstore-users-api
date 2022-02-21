@@ -4,35 +4,104 @@ package users
 import (
 	"fmt"
 
+	"github.com/amitabhprasad/bookstore-app/bookstore-users-api/utils/mysql_utils"
+
+	"github.com/amitabhprasad/bookstore-app/bookstore-users-api/datasources/mysql/users_db"
+
 	"github.com/amitabhprasad/bookstore-app/bookstore-users-api/utils/errors"
 )
 
 var (
-	userDB = make(map[int64]*User)
+	userDB     = make(map[int64]*User)
+	errorNoRow = "no rows in result set"
+)
+
+const (
+	queryInsertUser       = "INSERT into users (first_name,last_name,email,date_created,password,status) VALUES (?,?,?,?,?,?);"
+	queryGetUserById      = "SELECT id, first_name, last_name, email, date_created, status from users WHERE id = ?;"
+	queryUpdateUser       = "UPDATE users set first_name=?, last_name=?, email=? WHERE id=?;"
+	queryDeleteUser       = "DELETE from users WHERE id=?;"
+	queryFindUserByStatus = "SELECT id, first_name, last_name, email, date_created, status FROM users WHERE status = ?;"
 )
 
 func (user *User) Get() *errors.RestErr {
-	result := userDB[user.Id]
-	fmt.Println("called GET ", result)
-	if result == nil {
-		fmt.Println("inside if block....")
-		return errors.NewNotFoundError(fmt.Sprintf("User with the id %d  not found", user.Id))
+	stmt, err := users_db.Client.Prepare(queryGetUserById)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
 	}
-	user.Id = result.Id
-	user.FirstName = result.FirstName
-	user.LastName = result.LastName
-	user.Email = result.Email
-	user.DateCreated = result.DateCreated
+	defer stmt.Close()
+	result := stmt.QueryRow(user.Id)
+	if getErr := result.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.DateCreated, &user.Status); getErr != nil {
+		return mysql_utils.ParseError(getErr)
+	}
 	return nil
 }
 func (user *User) Save() *errors.RestErr {
-	current := userDB[user.Id]
-	if current != nil {
-		if current.Email == user.Email {
-			return errors.NewUserExistsError(fmt.Sprintf("User with the email %s  already registered ", user.Email))
-		}
-		return errors.NewUserExistsError(fmt.Sprintf("User with the id %d  already exists ", user.Id))
+	stmt, err := users_db.Client.Prepare(queryInsertUser)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
 	}
-	userDB[user.Id] = user
+	defer stmt.Close()
+	insertResult, saveErr := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DateCreated, user.Password, user.Status)
+	if saveErr != nil {
+		return mysql_utils.ParseError(saveErr)
+	}
+	userId, err := insertResult.LastInsertId()
+	if err != nil {
+		return mysql_utils.ParseError(err)
+	}
+	user.Id = userId
 	return nil
+}
+
+func (user *User) Update() *errors.RestErr {
+	stmt, err := users_db.Client.Prepare(queryUpdateUser)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+	defer stmt.Close()
+	_, updateErr := stmt.Exec(user.FirstName, user.LastName, user.Email, user.Id)
+	if updateErr != nil {
+		return mysql_utils.ParseError(updateErr)
+	}
+	return nil
+}
+
+func (user *User) Delete() *errors.RestErr {
+	stmt, err := users_db.Client.Prepare(queryDeleteUser)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+	defer stmt.Close()
+	_, delError := stmt.Exec(user.Id)
+	if delError != nil {
+		return mysql_utils.ParseError(delError)
+	}
+	return nil
+}
+
+func (user *User) FindByStatus(status string) ([]User, *errors.RestErr) {
+	stmt, err := users_db.Client.Prepare(queryFindUserByStatus)
+	if err != nil {
+		return nil, errors.NewInternalServerError(err.Error())
+	}
+	defer stmt.Close()
+	rows, findErr := stmt.Query(status)
+	if findErr != nil {
+		return nil, mysql_utils.ParseError(findErr)
+	}
+	defer rows.Close()
+	results := make([]User, 0)
+	for rows.Next() {
+		var user User
+		if err := rows.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.DateCreated, &user.Status); err != nil {
+			fmt.Println("ERRORS in Search response ", err)
+			return nil, mysql_utils.ParseError(err)
+		}
+		results = append(results, user)
+	}
+	if len(results) == 0 {
+		return nil, errors.NewNotFoundError(fmt.Sprintf("No user matching given status %s ", status))
+	}
+	return results, nil
 }

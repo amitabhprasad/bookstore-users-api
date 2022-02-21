@@ -8,6 +8,7 @@ import (
 
 func main() {
 	fmt.Println("Executing module ... bookstore user API")
+	//loadEnvVariables()
 	app.StartApplication()
 	// r := gin.Default()
 	// r.GET("/ping", func(c *gin.Context) {
