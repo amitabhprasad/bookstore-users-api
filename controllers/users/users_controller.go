@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/amitabhprasad/bookstore-app/bookstore-users-api/domain/users"
-	service_user "github.com/amitabhprasad/bookstore-app/bookstore-users-api/services/users"
+	"github.com/amitabhprasad/bookstore-app/bookstore-users-api/services"
 	"github.com/amitabhprasad/bookstore-app/bookstore-users-api/utils/errors"
 	"github.com/gin-gonic/gin"
 )
@@ -25,12 +25,12 @@ func CreateUser(c *gin.Context) {
 		c.JSON(restErr.Status, restErr)
 		return
 	}
-	result, err := service_user.CreateUser(user)
+	result, err := services.UsersService.CreateUser(user)
 	if err != nil {
 		c.JSON(err.Status, err)
 		return
 	}
-	c.JSON(http.StatusCreated, result)
+	c.JSON(http.StatusCreated, result.Marshall(c.GetHeader("X-Public") == "true"))
 }
 
 func GetUser(c *gin.Context) {
@@ -40,12 +40,13 @@ func GetUser(c *gin.Context) {
 		return
 	}
 
-	user, getErr := service_user.GetUser(userId)
+	user, getErr := services.UsersService.GetUser(userId)
 	if getErr != nil {
 		c.JSON(getErr.Status, getErr)
 		return
 	}
-	c.JSON(http.StatusOK, user)
+
+	c.JSON(http.StatusOK, user.Marshall(c.GetHeader("X-Public") == "true"))
 }
 
 func UpdateUser(c *gin.Context) {
@@ -64,12 +65,12 @@ func UpdateUser(c *gin.Context) {
 	user.Id = userId
 	isPartial := c.Request.Method == http.MethodPatch
 
-	result, updateErr := service_user.UpdateUser(isPartial, user)
+	result, updateErr := services.UsersService.UpdateUser(isPartial, user)
 	if updateErr != nil {
 		c.JSON(updateErr.Status, updateErr)
 		return
 	}
-	c.JSON(http.StatusFound, result)
+	c.JSON(http.StatusFound, result.Marshall(c.GetHeader("X-Public") == "true"))
 }
 
 func DeleteUser(c *gin.Context) {
@@ -78,7 +79,7 @@ func DeleteUser(c *gin.Context) {
 		c.JSON(idError.Status, idError)
 		return
 	}
-	deleteErr := service_user.DeleteUser(userId)
+	deleteErr := services.UsersService.DeleteUser(userId)
 	if deleteErr != nil {
 		c.JSON(deleteErr.Status, deleteErr)
 		return
@@ -88,10 +89,10 @@ func DeleteUser(c *gin.Context) {
 
 func Search(c *gin.Context) {
 	status := c.Query("status")
-	users, err := service_user.Search(status)
+	users, err := services.UsersService.SearchUser(status)
 	if err != nil {
 		c.JSON(err.Status, err)
 		return
 	}
-	c.JSON(http.StatusOK, users)
+	c.JSON(http.StatusOK, users.Marshall(c.GetHeader("X-Public") == "true"))
 }
