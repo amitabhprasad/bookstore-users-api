@@ -23,6 +23,7 @@ type userServiceInterface interface {
 	UpdateUser(bool, users.User) (*users.User, *errors.RestErr)
 	DeleteUser(int64) *errors.RestErr
 	SearchUser(string) (users.Users, *errors.RestErr)
+	LoginUser(users.UserLoginRequest) (*users.User, *errors.RestErr)
 }
 
 func (s *usersService) CreateUser(u users.User) (*users.User, *errors.RestErr) {
@@ -80,4 +81,16 @@ func (s *usersService) DeleteUser(id int64) *errors.RestErr {
 func (s *usersService) SearchUser(status string) (users.Users, *errors.RestErr) {
 	user := &users.User{}
 	return user.FindByStatus(status)
+}
+
+func (s *usersService) LoginUser(request users.UserLoginRequest) (*users.User, *errors.RestErr) {
+	dao := &users.User{
+		Email:    request.Email,
+		Password: crypto_utils.GetMD5(request.Password),
+	}
+	if err := dao.FindByEmailAndPassword(); err != nil {
+		return nil, errors.NewNotFoundError(
+			fmt.Sprintf("Invalid user credentials for user %s ", request.Email))
+	}
+	return dao, nil
 }

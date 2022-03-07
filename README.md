@@ -17,7 +17,7 @@ Caller shouldn't be responsible for logging error received.
     sudo docker run \
     --detach \
     --name=msql-bookstore \
-    --env="MYSQL_ROOT_PASSWORD=<chamgeMe>" \
+    --env="MYSQL_ROOT_PASSWORD=passw0rd" \
     --publish 6603:3306 \
     --volume=/Users/amitabhprasad/projects/goworkspace/src/github.com/amitabhprasad/bookstore-app/storage/docker/mysql-data:/var/lib/mysql \
     mysql
@@ -49,4 +49,6 @@ export mysql_users_schema=users_db
     --net elastic -p 9200:9200 -p 9300:9300
     --volume=/Users/amitabhprasad/projects/goworkspace/src/github.com/amitabhprasad/bookstore-app/elasticsearch/data
     docker.elastic.co/elasticsearch/elasticsearch:8.0.0
+
+- go clean -modcache
 

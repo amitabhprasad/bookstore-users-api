@@ -1,12 +1,15 @@
 package users
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/amitabhprasad/bookstore-app/bookstore-users-api/domain/users"
 	"github.com/amitabhprasad/bookstore-app/bookstore-users-api/services"
 	"github.com/amitabhprasad/bookstore-app/bookstore-users-api/utils/errors"
+
+	"github.com/amitabhprasad/bookstore-oauth-go/oauth"
 	"github.com/gin-gonic/gin"
 )
 
@@ -34,6 +37,11 @@ func CreateUser(c *gin.Context) {
 }
 
 func GetUser(c *gin.Context) {
+	if err := oauth.AuthenticateRequest(c.Request); err != nil {
+		fmt.Println("Error ", err)
+		//c.JSON(err.Status, err)
+		//return
+	}
 	userId, idError := getUserID(c)
 	if idError != nil {
 		c.JSON(idError.Status, idError)
@@ -46,7 +54,12 @@ func GetUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, user.Marshall(c.GetHeader("X-Public") == "true"))
+	if oauth.GetCallerId(c.Request) == userId {
+		c.JSON(http.StatusOK, user.Marshall(false))
+		return
+	}
+
+	c.JSON(http.StatusOK, user.Marshall(oauth.IsPublic(c.Request)))
 }
 
 func UpdateUser(c *gin.Context) {
@@ -95,4 +108,19 @@ func Search(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, users.Marshall(c.GetHeader("X-Public") == "true"))
+}
+
+func LoginUser(c *gin.Context) {
+	var request users.UserLoginRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		restErr := errors.NewbadRequestError("Invalid JSON body")
+		c.JSON(restErr.Status, restErr)
+		return
+	}
+	user, loginError := services.UsersService.LoginUser(request)
+	if loginError != nil {
+		c.JSON(loginError.Status, loginError)
+		return
+	}
+	c.JSON(http.StatusOK, user.Marshall(c.GetHeader("X-Public") == "true"))
 }
