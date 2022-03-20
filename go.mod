@@ -3,10 +3,10 @@ module github.com/amitabhprasad/bookstore-app/bookstore-users-api
 go 1.17
 
 require (
-	github.com/amitabhprasad/bookstore-oauth-go v0.0.0-20220303175751-23c9080b9854
+	github.com/amitabhprasad/bookstore-oauth2-go v0.0.0-20220309165343-f2a416e51eae
+	github.com/amitabhprasad/bookstore-util-go v0.0.0-20220320104935-dff4e0028793
 	github.com/gin-gonic/gin v1.7.7
 	github.com/go-sql-driver/mysql v1.6.0
-	go.uber.org/zap v1.21.0
 )
 
 require (
@@ -24,6 +24,7 @@ require (
 	github.com/ugorji/go/codec v1.1.7 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.7.0 // indirect
+	go.uber.org/zap v1.21.0 // indirect
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9 // indirect
 	golang.org/x/sys v0.0.0-20210510120138-977fb7262007 // indirect
 	gopkg.in/yaml.v2 v2.2.8 // indirect

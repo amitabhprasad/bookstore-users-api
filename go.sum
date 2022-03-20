@@ -1,5 +1,7 @@
-github.com/amitabhprasad/bookstore-oauth-go v0.0.0-20220303175751-23c9080b9854 h1:dAMb09pTRWhyw6c5TYIDMYUJFqCO9mBhiE6T4n8Zr9I=
-github.com/amitabhprasad/bookstore-oauth-go v0.0.0-20220303175751-23c9080b9854/go.mod h1:PK1wQFREWjKRfIdfaHiSv1ayQaS0tcZEhEMMao2mfeU=
+github.com/amitabhprasad/bookstore-oauth2-go v0.0.0-20220309165343-f2a416e51eae h1:eUFJStOr+NBq72ATHbfw0yo8MrxzGa3wd4EWDQ+5VnI=
+github.com/amitabhprasad/bookstore-oauth2-go v0.0.0-20220309165343-f2a416e51eae/go.mod h1:okz/sNjtggGgo2qiaso/tYuNlQdk9LQkUfA3ripQmMA=
+github.com/amitabhprasad/bookstore-util-go v0.0.0-20220320104935-dff4e0028793 h1:BQDJ7IBjKPacMojFWal9Q9SKsrDxkJQnCwPk0k92PQ8=
+github.com/amitabhprasad/bookstore-util-go v0.0.0-20220320104935-dff4e0028793/go.mod h1:2F8dVA8gTQvtHLkHnOc1r3tARlZStUS0HBJjSm2csLs=
 github.com/benbjohnson/clock v1.1.0 h1:Q92kusRqC1XV2MjkWETPvjJVqKetz1OzxZB7mHJLju8=
 github.com/benbjohnson/clock v1.1.0/go.mod h1:J11/hYXuz8f4ySSvYwY0FKfm+ezbsZBKZxNJlLklBHA=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

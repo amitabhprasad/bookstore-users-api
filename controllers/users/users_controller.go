@@ -1,22 +1,22 @@
 package users
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/amitabhprasad/bookstore-app/bookstore-users-api/domain/users"
 	"github.com/amitabhprasad/bookstore-app/bookstore-users-api/services"
-	"github.com/amitabhprasad/bookstore-app/bookstore-users-api/utils/errors"
+	"github.com/amitabhprasad/bookstore-oauth2-go/oauth2"
+	"github.com/amitabhprasad/bookstore-util-go/rest_errors"
 
-	"github.com/amitabhprasad/bookstore-oauth-go/oauth"
 	"github.com/gin-gonic/gin"
 )
 
-func getUserID(c *gin.Context) (int64, *errors.RestErr) {
+func getUserID(c *gin.Context) (int64, *rest_errors.RestErr) {
+
 	userId, err := strconv.ParseInt(c.Param("user_id"), 10, 64)
 	if err != nil {
-		return 0, errors.NewbadRequestError("Invalid userid, userid should be number")
+		return 0, rest_errors.NewbadRequestError("Invalid userid, userid should be number")
 	}
 	return userId, nil
 }
@@ -24,7 +24,7 @@ func CreateUser(c *gin.Context) {
 	var user users.User
 
 	if err := c.ShouldBindJSON(&user); err != nil {
-		restErr := errors.NewbadRequestError("Invalid JSON body")
+		restErr := rest_errors.NewbadRequestError("Invalid JSON body")
 		c.JSON(restErr.Status, restErr)
 		return
 	}
@@ -37,10 +37,19 @@ func CreateUser(c *gin.Context) {
 }
 
 func GetUser(c *gin.Context) {
-	if err := oauth.AuthenticateRequest(c.Request); err != nil {
-		fmt.Println("Error ", err)
-		//c.JSON(err.Status, err)
-		//return
+
+	if err := oauth2.AuthenticateRequest(c.Request); err != nil {
+		c.JSON(err.Status, err)
+		return
+	}
+
+	if callerId := oauth2.GetCallerId(c.Request); callerId == 0 {
+		err := rest_errors.RestErr{
+			Status:  http.StatusUnauthorized,
+			Message: "Resource not available please check accessToken passed",
+		}
+		c.JSON(err.Status, err)
+		return
 	}
 	userId, idError := getUserID(c)
 	if idError != nil {
@@ -53,13 +62,12 @@ func GetUser(c *gin.Context) {
 		c.JSON(getErr.Status, getErr)
 		return
 	}
-
-	if oauth.GetCallerId(c.Request) == userId {
+	if oauth2.GetCallerId(c.Request) == userId {
 		c.JSON(http.StatusOK, user.Marshall(false))
 		return
 	}
 
-	c.JSON(http.StatusOK, user.Marshall(oauth.IsPublic(c.Request)))
+	c.JSON(http.StatusOK, user.Marshall(oauth2.IsPublic(c.Request)))
 }
 
 func UpdateUser(c *gin.Context) {
@@ -71,7 +79,7 @@ func UpdateUser(c *gin.Context) {
 
 	var user users.User
 	if err := c.ShouldBindJSON(&user); err != nil {
-		restErr := errors.NewbadRequestError("Invalid JSON body")
+		restErr := rest_errors.NewbadRequestError("Invalid JSON body")
 		c.JSON(restErr.Status, restErr)
 		return
 	}
@@ -113,7 +121,7 @@ func Search(c *gin.Context) {
 func LoginUser(c *gin.Context) {
 	var request users.UserLoginRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
-		restErr := errors.NewbadRequestError("Invalid JSON body")
+		restErr := rest_errors.NewbadRequestError("Invalid JSON body")
 		c.JSON(restErr.Status, restErr)
 		return
 	}

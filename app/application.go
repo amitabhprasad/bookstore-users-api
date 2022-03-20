@@ -3,7 +3,7 @@ package app
 import (
 	"fmt"
 
-	"github.com/amitabhprasad/bookstore-app/bookstore-users-api/logger"
+	"github.com/amitabhprasad/bookstore-util-go/logger"
 	"github.com/gin-gonic/gin"
 )
 
