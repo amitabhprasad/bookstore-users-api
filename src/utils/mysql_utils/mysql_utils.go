@@ -12,7 +12,7 @@ const (
 	errNoRow = "no rows in result set"
 )
 
-func ParseError(err error) *rest_errors.RestErr {
+func ParseError(err error) rest_errors.RestErr {
 	logger.Error("Error in database transaction", err)
 	sqlErr, ok := err.(*mysql.MySQLError)
 	if !ok {
@@ -23,7 +23,7 @@ func ParseError(err error) *rest_errors.RestErr {
 	}
 	switch sqlErr.Number {
 	case 1062:
-		return rest_errors.NewbadRequestError("invalid data: ")
+		return rest_errors.NewBadRequestError("invalid data: ")
 	}
 	return rest_errors.NewInternalServerError("error processing request ", sqlErr)
 }

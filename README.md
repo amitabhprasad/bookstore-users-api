@@ -27,10 +27,13 @@ Caller shouldn't be responsible for logging error received.
  mysql -h localhost -p 6603 -u root -p
 
  run  
- export mysql_users_password= and set other env variables
- export mysql_users_username=root
- export mysql_users_host=127.0.0.1:6603
-export mysql_users_schema=users_db
+export mysql_password=passw0rd
+export mysql_username=root
+export mysql_host=127.0.0.1:6603
+export mysql_schema=users_db
+
+docker run -i -t -d -e mysql_username=root  -e mysql_password=passw0rd  -e mysql_host=172.17.0.2:3306 -e  mysql_schema=users_db -e auth_url=http://172.17.0.5:8082 -p 8081:8081 bookstore-user-api
+
 ## UserAPI
 - Developed using MVC
 ### MVC

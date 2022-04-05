@@ -1,10 +1,10 @@
-module github.com/amitabhprasad/bookstore-app/bookstore-users-api
+module github.com/amitabhprasad/bookstore-app/bookstore-users-api/src
 
 go 1.17
 
-require (
-	github.com/amitabhprasad/bookstore-oauth2-go v0.0.0-20220309165343-f2a416e51eae
-	github.com/amitabhprasad/bookstore-util-go v0.0.0-20220320104935-dff4e0028793
+require (															   
+	github.com/amitabhprasad/bookstore-oauth2-go v0.0.0-20220405132903-1f73e7135aa8
+	github.com/amitabhprasad/bookstore-util-go v0.0.0-20220326114754-91a3560ea202
 	github.com/gin-gonic/gin v1.7.7
 	github.com/go-sql-driver/mysql v1.6.0
 )

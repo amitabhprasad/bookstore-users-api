@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/amitabhprasad/bookstore-app/bookstore-users-api/app"
+	"github.com/amitabhprasad/bookstore-app/bookstore-users-api/src/app"
 )
 
 func main() {
