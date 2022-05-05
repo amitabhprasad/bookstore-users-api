@@ -17,7 +17,7 @@ Caller shouldn't be responsible for logging error received.
     - Service calls different business function
     - Model only responsible for holding and persisting data as needed
 #### This microservices exposes following API's
-  - GET "/ping", ping.Ping)
+  - GET "/ping"
   - GET "/users/search/"
 	- GET "/users/:user_id"
 	- POST "/users"
@@ -58,7 +58,7 @@ export mysql_schema=users_db
 ```
 docker run -i -t -d -e mysql_username=root  -e mysql_password=<<MYSQL_ROOT_PASSWORD>>  -e mysql_host=172.17.0.2:3306 -e  mysql_schema=users_db -e auth_url=http://172.17.0.5:8082 -p 8081:8081 bookstore-user-api
 ```
-- set env variabes as needed
+- This sets env variabes as needed
 
 ## go clean cache
 - go clean -modcache
@@ -67,8 +67,6 @@ docker run -i -t -d -e mysql_username=root  -e mysql_password=<<MYSQL_ROOT_PASSW
 ## Docker command
 - Use the docker network inspect bridge command. This will show you the containers currently attached to the bridge network:
   - ref: https://www.tutorialworks.com/container-networking/
-
-
-docker rm -f $(docker ps -a -q)
-docker rm $(docker ps --filter status=created -q)
-docker rm $(docker ps --filter status=exited -q)
+- docker rm -f $(docker ps -a -q)
+- docker rm $(docker ps --filter status=created -q)
+- docker rm $(docker ps --filter status=exited -q)
